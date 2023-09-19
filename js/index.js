@@ -4,6 +4,23 @@ const listPanel = document.querySelector("#list-panel");
 const list = document.querySelector("#list");
 const showPanel = document.querySelector("#show-panel");
 
+const hadleLikeUpdate = (_id, user) => {
+  console.log(_id, { user });
+};
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+  const userId = parseInt(document.querySelector("#users").value);
+  const bookId = parseInt(e.target.dataset.book_id);
+  if (userId) {
+    getOneUserData(userId)
+      .then((user) => hadleLikeUpdate(bookId, user))
+      .catch((err) => console.log("Error: ", err));
+  } else {
+    alert("Please select a user.");
+  }
+};
+
 const createBooksList = (booksArr) => {
   booksArr.forEach(({ id, title }) => {
     const li = document.createElement("li");
@@ -19,7 +36,7 @@ const createUserSelectElement = (usersArr) => {
   const option = document.createElement("option");
   select.name = "users";
   select.id = "users";
-  option.value = null;
+  option.value = 0;
   option.textContent = "Select a User";
   select.append(option);
   usersArr.forEach((user) => {
@@ -66,11 +83,16 @@ const createBookCard = (bookObj) => {
   const ul = document.createElement("ul");
   ul.id = `book-${id}-likes`;
 
-  const btn = document.createElement("button");
-  btn.textContent = "Like";
-  // btn.addEventListener("click", () => addLike(id));
+  const form = document.createElement("form");
+  form.id = `book-${id}-form`;
+  form.dataset.book_id = id;
+  form.addEventListener("submit", handleSubmit);
+  const submit = document.createElement("input");
+  submit.type = "submit";
+  submit.value = "Like";
+  form.append(submit);
 
-  div.append(img, h2, h3, h4, p, ul, btn);
+  div.append(img, h2, h3, h4, p, ul, form);
   showPanel.appendChild(div);
 
   createUsersList(id, users);
@@ -79,6 +101,12 @@ const createBookCard = (bookObj) => {
 const getAllUsersData = () => {
   getData(usersUrl)
     .then((users) => createUserSelectElement(users))
+    .catch((err) => console.log("Error: ", err.message));
+};
+
+const getOneUserData = (_id) => {
+  return getData(`${usersUrl}/${_id}`)
+    .then((user) => user)
     .catch((err) => console.log("Error: ", err.message));
 };
 
